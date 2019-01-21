@@ -1,38 +1,19 @@
-var bonjour = require("bonjour")();
+const HOST = "192.168.252.81";
+const PORT = 43435;
 
-bonjour.publish({
-  name: "Bagel test",
-  type: "_Bagel._tcp",
-  domain: "",
-  port: 43435
-});
+const mdns = require("mdns");
 
-// browse for all http services
-bonjour.find({ type: "_Bagel._tcp" }, function(service) {
-  console.log("Found an HTTP server:", service);
-});
+const ad = mdns.createAdvertisement(mdns.tcp("Bagel"), PORT);
+ad.start();
 
-var net = require("net");
-
-var HOST = "192.168.1.19";
-var PORT = 43435;
-
-// Create a server instance, and chain the listen function to it
-// The function passed to net.createServer() becomes the event handler for the 'connection' event
-// The sock object the callback function receives UNIQUE for each connection
-net
+require("net")
   .createServer(function(sock) {
-    // We have a connection - a socket object is assigned to the connection automatically
     console.log("CONNECTED: " + sock.remoteAddress + ":" + sock.remotePort);
-
-    // Add a 'data' event handler to this instance of socket
     sock.on("data", function(data) {
-      console.log("DATA " + sock.remoteAddress + ": " + data);
-      // Write the data back to the socket, the client will receive it as data from the server
+      console.log("" + data);
+      console.log("DATA " + sock.remoteAddress + ": ", JSON.parse("" + data));
       sock.write('You said "' + data + '"');
     });
-
-    // Add a 'close' event handler to this instance of socket
     sock.on("close", function(data) {
       console.log("CLOSED: " + sock.remoteAddress + " " + sock.remotePort);
     });
@@ -40,3 +21,47 @@ net
   .listen(PORT, HOST);
 
 console.log("Server listening on " + HOST + ":" + PORT);
+
+// var a = [
+//   {
+//     addresses: ["fe80::7f:e25f:deeb:13b", "192.168.252.81"],
+//     rawTxt: "",
+//     txt: {},
+//     name: "iMac — David",
+//     fqdn: "iMac — David._Bagel._tcp.local",
+//     host: "iMac-David.local",
+//     referer: {
+//       address: "192.168.252.81",
+//       family: "IPv4",
+//       port: 5353,
+//       size: 255
+//     },
+//     port: 43435,
+//     type: "Bagel",
+//     protocol: "tcp",
+//     subtypes: []
+//   },
+//   {
+//     addresses: [
+//       "fe80::7f:e25f:deeb:13b",
+//       "192.168.252.81",
+//       "fe80::b074:96ff:fe90:f4dd",
+//       "fe80::d89e:132a:be13:40f3"
+//     ],
+//     name: "Bagel",
+//     fqdn: "Bagel._Bagel._tcp.local",
+//     host: "iMac-David.local",
+//     referer: {
+//       address: "192.168.252.81",
+//       family: "IPv4",
+//       port: 5353,
+//       size: 325
+//     },
+//     port: 43435,
+//     type: "Bagel",
+//     protocol: "tcp",
+//     subtypes: [],
+//     rawTxt: "",
+//     txt: {}
+//   }
+// ];
